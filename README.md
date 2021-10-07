@@ -32,3 +32,30 @@ otp_n = Hash(pk_n, ts)
     ```
     npx react-native run-android
     ```
+
+# ESP32
+
+| Left Pin | Right Pin |
+| - | - |
+| Vcc | Gnd |
+| - | Buzzer |
+| - | RTC SCL |
+| - | - |
+| - | - |
+| - | RTC SDA |
+| Keypad C3 | - |
+| Keypad C4 | - |
+| Keypad R1 | - |
+| Keypad R2 | - |
+| Keypad R3 | - |
+| Keypad R4 | - |
+| Keypad C1 | - |
+| - | - |
+| Keypad C2 | - |
+| - | - |
+| - | - |
+| - | - |
+| - | - |
+*Micro USB Header is here!*
+
+![Pin Diagram](doc/ESP32-38 PIN-DEVBOARD.png)
