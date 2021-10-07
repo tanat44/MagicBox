@@ -58,4 +58,4 @@ otp_n = Hash(pk_n, ts)
 | - | - |
 *Micro USB Header is here!*
 
-![Pin Diagram](doc/ESP32-38 PIN-DEVBOARD.png)
+![Pin Diagram](doc/ESP32-38PIN-DEVBOARD.png)
