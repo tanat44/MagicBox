@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<button id="button0">Alert</button><br/>
+<button id="button1">Button</button><br/>
+<button id="button2">Copy</button><br/>
+<button id="button3">Html</button><br/>
+<button id="button4">Save</button><br/>
+<button id="button5">Load</button><br/>
+input1 <input type="text" id="input1"/><br/>
+input2 <input type="text" id="input2"/><br/>
+<div id="output"></div><hr/>
+
+Key <input type="text" id="key_input" value="1UGhxzO8KB3O87kYpqJh04GY6sKuWrgAz3K0D850IqwtvbkMiqXx7AOreBaGCCfiVY7yHzmC8gM0EUDjUkOukbQmS98z7S7uVp4pIAIjAklMgUbQ0zk86boErNtnQ2STrsRmlxZZRbIE0jYe2pIUqdMwSJi8wwUYKPOC7xmRH8gG8oaDLXztPkyXQrOXtBbt6lEvrToecxRSho9CrkNaSlZtHBqgfibxuy4AVu20svMQnmgdPX9qxWVxraSymWe0"/><br/>
+Payload <input type="text" id="payload_input" value="20211010"/><br/>
+<button id="buttonSha">Get HMAC (SHA-1) and OTP</button><br/>
+<div id="hmac_output"></div>
+<div id="otp_output"></div>
+<hr/>
+
+<script src="sha1.js"></script>
+
+
+<script>
+    
+    const input1 = document.getElementById("input1");
+    const input2 = document.getElementById("input2");
+
+    var username = "";
+
+    document.getElementById('button0').onclick = function() {
+        alert("button was clicked");
+    };
+
+    document.getElementById('button1').onclick = function() {
+        console.log("button1 ", 8888)
+    };
+
+    document.getElementById('button2').onclick = function() {
+        let x = input1.value + input2.value
+        console.log("A sum is", x)
+        let y = parseInt(input1.value) + parseInt(input2.value)
+        console.log("B sum is", y)
+        let z = doSomething(input1.value, input2.value)
+        console.log("Call function", z)
+    };
+
+    document.getElementById('button3').onclick = function() {
+        document.getElementById('output').innerHTML = "NEW TEXT IS HERE"
+    };
+
+    document.getElementById('button4').onclick = function() {
+        username = input1.value
+    };
+
+    document.getElementById('button5').onclick = function() {
+        console.log(username)
+    };
+
+    function doSomething(x, y) {
+        return parseFloat(x) / y;
+    }
+
+    // Start here !!
+    document.getElementById('buttonSha').onclick = function() {
+        document.getElementById('hmac_output').innerHTML = "Computed HMAC (SHA-1) = " + hex_hmac_sha1(key_input.value, payload_input.value)
+        document.getElementById('otp_output').innerHTML = "OTP = " + genOTP_hmac_sha1(key_input.value, payload_input.value, otp_len = 6)
+        console.log('HMAC', hex_hmac_sha1(key_input.value, payload_input.value))
+        console.log('OTP', genOTP_hmac_sha1(key_input.value, payload_input.value, otp_len = 6))
+    }
+
+    function genOTP_hmac_sha1(key, payload, otp_len) {
+        let hmac_result = hex_hmac_sha1(key_input.value, payload_input.value);
+        //ref: http://pajhome.org.uk/crypt/md5/sha1.js
+
+        let h, offset, bin_code, otp;
+
+        // Get byte array
+        h = hexToBytes(hmac_result);
+
+        // Truncate
+        offset = h[19] & 0xf;
+        bin_code = (h[offset] & 0x7f) << 24 | 
+            (h[offset + 1] & 0xff) << 16 | 
+            (h[offset + 2] & 0xff) << 8 | 
+            h[offset + 3] & 0xff;
+        otp_full = bin_code + '';
+        return otp_full.substr(otp_full.length - otp_len, otp_len);
+    }
+
+    function hexToBytes(hex) {
+        let C, bytes, c;
+        bytes = [];
+        c = 0;
+        C = hex.length;
+        while (c < C) {
+            bytes.push(parseInt(hex.substr(c, 2), 16));
+            c += 2;
+        }
+        return bytes;
+    }
+
+
+</script>
+
+</body>
+</html>
