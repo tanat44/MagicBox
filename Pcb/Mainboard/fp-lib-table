@@ -1,0 +1,5 @@
+(fp_lib_table
+  (lib (name Pcb)(type KiCad)(uri C:/Tanut/Code/MagicBox/Pcb.pretty)(options "")(descr ""))
+  (lib (name Mainboard)(type KiCad)(uri C:/Tanut/Code/MagicBox/Pcb/Mainboard.pretty)(options "")(descr ""))
+  (lib (name MagicBox)(type KiCad)(uri C:/Tanut/Code/MagicBox/Pcb/MagicBox.pretty)(options "")(descr ""))
+)

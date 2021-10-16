@@ -1,0 +1,3 @@
+(sym_lib_table
+  (lib (name MagicBox)(type Legacy)(uri C:/Tanut/Code/MagicBox/Pcb/MagicBox.lib)(options "")(descr ""))
+)
