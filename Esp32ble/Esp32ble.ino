@@ -90,9 +90,11 @@ void setup() {
 }
 
 uint8_t debugCount = 0;
+uint8_t v = 50;
+
 void debugLog() {
+  
   if (debugCount > 40) {
-    magicHal.printTime();
     Serial.print("Connected Devices : ");
     Serial.println(pServer->getConnectedCount());
     Serial.println(magicData.get());
@@ -107,18 +109,31 @@ String enterKey = "";
 void loop() {
   delay(50);
   debugLog();
-
+  
   char key = magicHal.keypad.getKey();
   if(key)
   {
+
+    if (key == 'B'){
+      magicHal.setLock(true);
+    } else if (key == 'C') {
+      magicHal.setLock(false);
+    }
+    
     Serial.print("Key Pressed : ");
     Serial.println(key);
     enterKey += key;
     magicHal.buzzerKeyTone(KEY_TONE_MS);
     
     if (enterKey.length() >=4){
+
+      
+      // UNLOCK
       if (enterKey == magicData.get()){
         magicHal.buzzerKeyTone(UNLOCK_TONE_MS);
+        magicHal.setLock(false);
+        
+      // WRONG PASSWORD
       } else {
         magicHal.buzzerAlarm();
       }

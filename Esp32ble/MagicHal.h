@@ -2,6 +2,7 @@
 #define MagicHal_h
 
 #define BUZZER_PIN 23
+#define SERVO_PIN 19
 #define KEY_TONE_MS 100
 #define UNLOCK_TONE_MS 500
 #define KEYPAD_ROW 4
@@ -9,6 +10,7 @@
 
 #include <RTClib.h>
 #include <Keypad.h>
+#include <ESP32Servo.h>
 #include "Arduino.h"
 
 
@@ -20,8 +22,11 @@ class MagicHal {
     void buzzerAlarm();    
     void printTime();
     void setTime(DateTime t);
+    void servoWrite(uint8_t angle);
+    void setLock(bool lock);
 
     Keypad keypad;
+    Servo servo;
 
   private:
     RTC_DS1307 rtc;

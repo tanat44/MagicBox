@@ -15,6 +15,9 @@ MagicHal::MagicHal() : keypad(makeKeymap(keys), rowPins, colPins, KEYPAD_ROW, KE
   // BUZZER
   pinMode(BUZZER_PIN, OUTPUT);
   digitalWrite(BUZZER_PIN, HIGH);   // LOW to on the buzzer  
+
+  // SERVO
+  servo.attach(SERVO_PIN);
   
   // RTC
   rtc.begin();  
@@ -60,4 +63,12 @@ void MagicHal::printTime() {
 
 void MagicHal::setTime(DateTime t) {
   rtc.adjust(t);
+}
+
+void MagicHal::servoWrite(uint8_t angle){
+  servo.write(angle);
+}
+
+void MagicHal::setLock(bool lock){
+  servo.write(lock ? 60 : 120);
 }
