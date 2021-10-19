@@ -72,3 +72,7 @@ void MagicHal::servoWrite(uint8_t angle){
 void MagicHal::setLock(bool lock){
   servo.write(lock ? 60 : 120);
 }
+
+RTC_DS1307* MagicHal::getRtcPointer(){
+  return &rtc;
+}

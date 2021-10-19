@@ -6,19 +6,21 @@
 
 #include "MagicData.h"
 #include "MagicHal.h"
+#include "MagicUtil.h"
 #include "EEPROM.h"
 
 #define COMMAND_LEN 4
 
 
 // BLE 
-#define SERVICE_UUID        "4fafc201-1fb5-459e-8fcc-c5c9c331914b"
-#define C1_UUID "beb5483e-36e1-4688-b7f5-ea07361b26a8"
-#define C2_UUID "beb5483e-36e1-4688-b7f5-ea0736as26a8"
-
+#define SERVICE_UUID  "4fafc201-1fb5-459e-8fcc-c5c9c331914b"
+#define C1_UUID       "beb5483e-36e1-4688-b7f5-ea07361b26a8"
+#define C2_UUID       "beb5483e-36e1-4688-b7f5-ea0736as26a8"
 BLEServer* pServer;
+
 MagicData magicData;
 MagicHal magicHal;
+MagicUtil magicUtil(magicHal.getRtcPointer());
 
 class MyCallbacks: public BLECharacteristicCallbacks
 {

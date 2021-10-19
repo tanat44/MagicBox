@@ -24,6 +24,7 @@ class MagicHal {
     void setTime(DateTime t);
     void servoWrite(uint8_t angle);
     void setLock(bool lock);
+    RTC_DS1307* getRtcPointer();
 
     Keypad keypad;
     Servo servo;
