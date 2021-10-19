@@ -8,8 +8,13 @@
 #include "MagicHal.h"
 #include "EEPROM.h"
 
+#define COMMAND_LEN 4
+
+
+// BLE 
 #define SERVICE_UUID        "4fafc201-1fb5-459e-8fcc-c5c9c331914b"
-#define CHARACTERISTIC_UUID "beb5483e-36e1-4688-b7f5-ea07361b26a8"
+#define C1_UUID "beb5483e-36e1-4688-b7f5-ea07361b26a8"
+#define C2_UUID "beb5483e-36e1-4688-b7f5-ea0736as26a8"
 
 BLEServer* pServer;
 MagicData magicData;
@@ -31,6 +36,46 @@ class MyCallbacks: public BLECharacteristicCallbacks
   }
 };
 
+class RpcCallbacks: public BLECharacteristicCallbacks
+{
+  void onWrite(BLECharacteristic *pCharacteristic)
+  {
+    std::string value = pCharacteristic->getValue();
+    String str (value.c_str());
+   
+    if (str.length() == COMMAND_LEN)
+    {
+      String command = str.substring(0,COMMAND_LEN);
+      String response = "";
+      if (command == "TEST"){
+        response = "RES|Rpc Working";
+      }
+
+      pCharacteristic->setValue(response.c_str());
+      pCharacteristic->notify();
+    } 
+    else if (str.length() > COMMAND_LEN)
+    {
+      String command = str.substring(0, COMMAND_LEN);
+      String value = str.substring(COMMAND_LEN, str.length());
+      String response = "";
+      // Add value
+      if (command == "AVAL"){
+        int v = value.toInt();
+        response = "RES|" + String(v+1);
+      }
+      
+      pCharacteristic->setValue(response.c_str());
+      pCharacteristic->notify();
+    } 
+    else 
+    {
+      pCharacteristic->setValue(String("ERR|Command Error").c_str());
+      pCharacteristic->notify();
+    }
+  }
+};
+
 class MyServerCallbacks: public BLEServerCallbacks
 {
   void onDisconnect(BLEServer* pServer)
@@ -46,17 +91,27 @@ void initBLE() {
   BLEDevice::init("MagicBox");
   pServer = BLEDevice::createServer();
   pServer->setCallbacks(new MyServerCallbacks());
-
   
   BLEService *pService = pServer->createService(SERVICE_UUID);
   BLECharacteristic *pCharacteristic = pService->createCharacteristic(
-                                         CHARACTERISTIC_UUID,
+                                         C1_UUID,
                                          BLECharacteristic::PROPERTY_READ |
                                          BLECharacteristic::PROPERTY_WRITE
                                        );
 
+ 
   pCharacteristic->setCallbacks(new MyCallbacks());
   pCharacteristic->setValue(magicData.get().c_str());
+
+  BLECharacteristic *characteristicRpc = pService->createCharacteristic(
+                                       C2_UUID,
+                                       BLECharacteristic::PROPERTY_READ |
+                                       BLECharacteristic::PROPERTY_WRITE |
+                                       BLECharacteristic::PROPERTY_NOTIFY
+                                     );
+  characteristicRpc->setCallbacks(new RpcCallbacks());
+  characteristicRpc->setValue(String("Unknown").c_str());
+
   pService->start();
   
   BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
@@ -65,7 +120,6 @@ void initBLE() {
   pAdvertising->setMinPreferred(0x06);  // functions that help with iPhone connections issue
   pAdvertising->setMinPreferred(0x12);
   BLEDevice::startAdvertising();
-  Serial.println("Characteristic defined! Now you can read it in your phone!");
 }
 
 void initEEPROM() {
@@ -78,15 +132,11 @@ void initEEPROM() {
   magicData.load();
 }
 
-void initIO(){
-
-}
-
 void setup() {
+  setCpuFrequencyMhz(80);       // to reduce power consumption, default is at 240Mhz
   Serial.begin(115200);
   initEEPROM();
   initBLE();
-  initIO();
 }
 
 uint8_t debugCount = 0;
