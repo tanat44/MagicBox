@@ -28,10 +28,15 @@ otp_n = Hash(pk_n, ts)
     1. Turn on **Install via USB**
     1. Turn on **USB debugging (Security Setting)** 
     1. Turn off **Turn on MIUI optimization**
-1. Run the following cmd
+1. Run the following cmd in 2 terminals (one each)
+    ```
+    npx react-native start
+    ```
     ```
     npx react-native run-android
     ```
+
+1. Fix issue when debugging in Chrome by "Disable caching under network when in debug mode" [Link](https://github.com/facebook/react-native/issues/28844)
 
 # ESP32
 

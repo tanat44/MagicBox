@@ -10,6 +10,6 @@ import {name as appName} from './app.json';
 
 import React, { Component } from "react";
 import { AppRegistry } from "react-native";
-import App from "./BLE-example/App"; //<-- simply point to the example js!
+import App from "./App"; //<-- simply point to the example js!
 
 AppRegistry.registerComponent(appName, () => App);
