@@ -1,15 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Button, View, SafeAreaView, Text, Alert, NativeModules, NativeEventEmitter, ActivityIndicator, Platform, PermissionsAndroid } from 'react-native';
+import { Text, LinearProgress } from 'react-native-elements'
 
 export const ConnectStatus = (props) => {
     return (
-        <View style={{ justifyContent: 'center', alignItem: 'center', backgroundColor: `${props.connected ? "green" : "none"}`, flex: 1 }}>
-            {props.scanning ?
-                <ActivityIndicator size="large" color="#0000ff" />
-                :
-                <Text style={{ textAlign: 'center', color: `${props.connected ? "white" : "gray"}`}}>{props.connected ? "Device connected" : "No connection"} </Text>
-            }
-
-        </View>
+        <React.Fragment>
+            {props.scanning && !props.connected &&  <LinearProgress color="primary" />}
+            {props.connected && <Text style={{ textAlign: 'center', color: "white", backgroundColor: "springgreen"}}>Connected</Text>}
+        </React.Fragment>
     );
 }

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Button, View, SafeAreaView, Text, Alert, NativeModules, NativeEventEmitter, ActivityIndicator, Platform, PermissionsAndroid, TextInput } from 'react-native';
+import { StyleSheet, View, SafeAreaView, Text, Alert, NativeModules, NativeEventEmitter, ActivityIndicator, Platform, PermissionsAndroid, TextInput } from 'react-native';
+import { Card, ListItem, Button, Header } from 'react-native-elements'
 
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Buffer } from 'buffer';
@@ -52,8 +53,6 @@ const App = () => {
     console.log('Scan stopped');
     setScanning(false);
 
-    console.log(devicesRef.current)
-
     // Keep only unique devices
     let uniqueId = []
     let uniqueDevices = []
@@ -81,7 +80,7 @@ const App = () => {
     BleManager.connect(deviceId).then(() => {
       setTimeout(() => {
         BleManager.retrieveServices(deviceId).then((peripheralData) => {
-          console.log("p", peripheralData)
+          console.log('Peripheral Data', peripheralData)
           setDevices([peripheralData]);
         });
       }, 900);
@@ -153,17 +152,18 @@ const App = () => {
 
 
   const mbSetUserCode = () => {
-    if (userCode.length != 4){
-      alert("User code must be 4 digits")
-      return
-    }
-
+    const deviceId = getDeviceId(devices[0])
+    setTimeout(() => {
+      BleManager.write(deviceId, BLE_SERVICE_UUID, BLE_C1_UUID, stringToBytes(userCode)).then(() => {
+        console.log('Writed');
+      });
+    }, 500);
   }
 
   const mbCallFunction = () => {
     const deviceId = getDeviceId(devices[0])
     setTimeout(() => {
-      BleManager.write(deviceId, BLE_SERVICE_UUID, "beb5483e-36e1-4688-b7f5-ea0736ac26a8", stringToBytes(RPC_FUNCTION[functionIndex]+inputText)).then(() => {
+      BleManager.write(deviceId, BLE_SERVICE_UUID, BLE_C2_UUID, stringToBytes(RPC_FUNCTION[functionIndex]+inputText)).then(() => {
         console.log('Writed');
         BleManager.read(deviceId, BLE_SERVICE_UUID, BLE_C2_UUID).then((readData) => {
           const buffer = Buffer.from(readData); 
@@ -176,18 +176,18 @@ const App = () => {
         });
       });
     }, 500);
-    // setTimeout(() => {
-    //   BleManager.startNotification(deviceId, BLE_SERVICE_UUID, "beb5483e-36e1-4688-b7f5-ea0736ac26a8").then(() => {
-    //     console.log('Started notification');
-    //     setTimeout(() => {
-    //       BleManager.write(deviceId, BLE_SERVICE_UUID, "beb5483e-36e1-4688-b7f5-ea0736ac26a8", stringToBytes(inputText)).then(() => {
-    //         console.log('Writed');
-    //       });
-    //     }, 500);
-    //   }).catch((error) => {
-    //     console.log('Notification error', error);
-    //   });
-    // }, 200);
+  }
+
+  const mbReadUserCode = () => {
+    const deviceId = getDeviceId(devices[0])
+    console.log('reading user code')
+    setTimeout(() => {
+      BleManager.read(deviceId, BLE_SERVICE_UUID, BLE_C1_UUID).then((readData) => {
+        const buffer = Buffer.from(readData); 
+        const data = buffer.toString();
+        setUserCode(data)
+      })
+    }, 500);
   }
 
   const onUserCodeChange = (newCode) => {
@@ -206,62 +206,83 @@ const App = () => {
 
   return (
   <SafeAreaProvider>
+  <Header
+    centerComponent={{ text: 'MagicBox', style: { color: '#fff' } }}
+  />
   <View style={{flexDirection: 'column', alignItems: 'center'}}>
-    <Text style={styles.title}>BLE Connection</Text>
-    <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 30, paddingVertical: 20, alignItems: "stretch"}}>
-      <View style={styles.fixToText}>
-        {connected ? 
-          <Button style={styles.button} title="Disconnect" onPress={()=>BleManager.disconnect(getDeviceId(devices[0]), false)} />
-          :
-          <Button style={styles.button} title="Connect MagicBox" onPress={()=>startScan()} />
-        }
-        
+
+    <Card containerStyle={styles.card}>
+      <Card.Title>Connection</Card.Title>
+      <Card.Divider/>
+      <View style={{flexDirection: 'column', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 30}}>
+        <View style={styles.fixToText}>
+          {connected ? 
+            <Button style={styles.button} title="Disconnect" onPress={()=>BleManager.disconnect(getDeviceId(devices[0]), false)} />
+            :
+            <Button style={styles.button} title="Connect MagicBox" onPress={()=>startScan()} />
+          }
+          
+        </View>
+        <ConnectStatus connected={connected} scanning={scanning}/>
       </View>
-      <ConnectStatus connected={connected} scanning={scanning}/>
-    </View>
+    </Card>
 
-    <Text style={styles.title}>MagicBox Function</Text>
+    {connected && <Card containerStyle={styles.card}>
+      <Card.Title>User Code</Card.Title>
+      <Card.Divider/>
+      <View style={styles.row}>
+        <Text>Value</Text>
+        <TextInput
+          style={{...styles.input, flex: 1}}
+          onChangeText={onUserCodeChange}
+          value={userCode}
+        />
+      </View>
+      <View style={styles.row}>
+        <View style={{...styles.fixToText, paddingHorizontal: 10}}>
+          <Button style={styles.button}
+              title="Update"
+              onPress={()=>mbSetUserCode()}
+            />
+        </View>
+        <View style={styles.fixToText}>
+          <Button style={styles.button}
+              title="Read"
+              onPress={()=>mbReadUserCode()}
+            />
+        </View>
+      </View>
+    </Card>
+    }
 
-
-    <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 30}}>
-      <Text>New User Code</Text>
-      <TextInput
-        style={{...styles.input, flex: 1}}
-        onChangeText={onUserCodeChange}
-        value={userCode}
-      />
-    </View>
-    <View style={styles.fixToText} pointerEvents={connected ? 'none':'auto'}>
+  {connected && <Card containerStyle={styles.card}>
+      <Card.Title>RPC</Card.Title>
+      <Card.Divider/>
+      <RpcFunctionButton options={RPC_FUNCTION} onIndexChange={rpcFunctionChanged}/>
+      <View style={styles.row}>
+        <Text>Parameter</Text>
+        <TextInput
+          style={{...styles.input, flex: 1}}
+          onChangeText={(text) => setInputText(text)}
+          value={inputText}
+        />
+      </View>
+      <View style={styles.row}>
+        <Text>Return Value</Text>
+        <TextInput
+          style={{...styles.input, flex: 1}}
+          value={functionReturn}
+          editable={false}
+        />
+      </View>
       <Button style={styles.button}
-          title="Set User Code"
-          onPress={()=>mbSetUserCode()}
+          title="Call Function"
+          onPress={()=>mbCallFunction()}
           disabled={!connected}
         />
-    </View>
-    <Separator/>
+    </Card>
+    }
 
-    <RpcFunctionButton options={RPC_FUNCTION} onIndexChange={rpcFunctionChanged}/>
-    <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 30}}>
-      <Text>Parameter</Text>
-      <TextInput
-        style={{...styles.input, flex: 1}}
-        onChangeText={(text) => setInputText(text)}
-        value={inputText}
-      />
-    </View>
-    <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 30}}>
-      <Text>Return</Text>
-      <TextInput
-        style={{...styles.input, flex: 1}}
-        value={functionReturn}
-        editable={false}
-      />
-    </View>
-    <Button style={styles.button}
-        title="Call Function"
-        onPress={()=>mbCallFunction()}
-        disabled={!connected}
-      />
   </View>
   </SafeAreaProvider>
 )};
@@ -294,6 +315,15 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     padding: 10,
   },
+  row: {
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    justifyContent: 'center', 
+    paddingHorizontal: 30
+  },
+  card: {
+    width: "100%"
+  }
 
 });
 
